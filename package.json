@@ -1,0 +1,12 @@
+{
+  "name": "ai-image-repository",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Image Repository – Distributed AI Image Generation System (Module 4: Frontend & Search Engineer)",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "lint": "npm --prefix frontend run lint"
+  }
+}
