@@ -110,7 +110,7 @@ export function WorkerList({ workers = [], loading = false, error = null, onRefr
 
       {/* Worker Grid */}
       {!loading && !error && filteredWorkers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
           {filteredWorkers.map((worker) => (
             <WorkerCard key={worker.worker_id} worker={worker} />
           ))}

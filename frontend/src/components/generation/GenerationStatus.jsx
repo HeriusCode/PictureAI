@@ -67,7 +67,7 @@ export function GenerationStatus({
   const generatedImage = images && images.length > 0 ? images[0] : null;
 
   return (
-    <div className={`w-full max-w-3xl mx-auto my-6 p-5 sm:p-6 rounded-2xl border ${currentConfig.borderColor} ${currentConfig.bgColor} shadow-sm backdrop-blur-xs animate-fade-in relative transition-all`}>
+    <div className={`w-full max-w-5xl xl:max-w-6xl mx-auto my-6 p-6 sm:p-7 rounded-2xl border ${currentConfig.borderColor} ${currentConfig.bgColor} shadow-sm backdrop-blur-xs animate-fade-in relative transition-all`}>
       
       {/* Dismiss button */}
       {onClose && (

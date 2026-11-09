@@ -15,9 +15,9 @@ const SUGGESTIONS = [
 
 export function SearchSuggestions({ onSelect, activeQuery }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 pt-2">
-      <span className="text-xs font-medium text-surface-500 flex items-center gap-1.5 mr-1">
-        <Sparkles className="w-3.5 h-3.5 text-brand-500" />
+    <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+      <span className="text-xs font-semibold text-surface-500 flex items-center gap-1.5 mr-1">
+        <Sparkles className="w-4 h-4 text-brand-500" />
         Gợi ý tìm kiếm:
       </span>
       {SUGGESTIONS.map((item) => {
@@ -27,10 +27,10 @@ export function SearchSuggestions({ onSelect, activeQuery }) {
             key={item}
             type="button"
             onClick={() => onSelect(item)}
-            className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
               isSelected
-                ? 'bg-brand-600 text-white border-brand-600 font-medium shadow-xs'
-                : 'bg-surface-50 text-surface-600 border-surface-200 hover:bg-surface-100 hover:border-surface-300 hover:text-surface-900'
+                ? 'bg-brand-600 text-white border-brand-600 font-semibold shadow-xs'
+                : 'bg-white text-surface-700 border-surface-200 hover:bg-surface-100 hover:border-surface-300 hover:text-surface-900 shadow-2xs'
             }`}
           >
             {item}

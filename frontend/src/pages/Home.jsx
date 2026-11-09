@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Layers, Cpu, ArrowRight } from 'lucide-react';
+import { Sparkles, Layers, Cpu, ArrowRight, Palette, Zap, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/search/SearchBar';
 import ImageGallery from '../components/gallery/ImageGallery';
@@ -48,34 +48,34 @@ export function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* 3.2. HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-surface-50 py-16 sm:py-24 border-b border-surface-200">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/60 via-white to-surface-50 py-16 sm:py-24 border-b border-surface-200">
         
         {/* Subtle decorative background blur */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-200/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[350px] bg-brand-200/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 text-center relative z-10">
           
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-brand-200 text-brand-700 shadow-xs mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-brand-600" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white border border-brand-200 text-brand-700 shadow-xs mb-6">
+            <Sparkles className="w-4 h-4 text-brand-600" />
             <span>Distributed AI Image Generation • Watercolor Encyclopedia</span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-surface-900 tracking-tight leading-tight sm:leading-none mb-5">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-surface-900 tracking-tight leading-tight sm:leading-none mb-6">
             Discover and Generate <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 bg-clip-text text-transparent">
               AI Images
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-surface-600 leading-relaxed mb-8">
+          <p className="max-w-3xl mx-auto text-base sm:text-xl text-surface-600 leading-relaxed mb-10">
             Kho lưu trữ hình ảnh bách khoa toàn thư phong cách màu nước. 
             Tìm kiếm tức thì hoặc tự động phân phối tác vụ sinh ảnh đến cụm AI Worker phân tán.
           </p>
 
-          {/* Search Bar Component */}
+          {/* Search Bar Component - Wide & prominent */}
           <SearchBar
             initialQuery={searchQuery}
             onSearch={handleSearch}
@@ -85,8 +85,24 @@ export function Home() {
             showSuggestions={true}
           />
 
-          {/* Quick link to Worker Dashboard */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-surface-500">
+          {/* Capability Highlights Strip across wide screens */}
+          <div className="mt-10 pt-6 border-t border-surface-200/60 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-surface-600">
+            <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/80 border border-surface-200/80 shadow-2xs">
+              <Palette className="w-4 h-4 text-brand-600" />
+              <span className="font-medium">Màu nước Bách khoa toàn thư</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/80 border border-surface-200/80 shadow-2xs">
+              <Cpu className="w-4 h-4 text-brand-600" />
+              <span className="font-medium">Cụm AI Worker GPU phân tán</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/80 border border-surface-200/80 shadow-2xs">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span className="font-medium">Tự động sinh ảnh khi chưa có</span>
+            </div>
+          </div>
+
+          {/* Quick links to Worker Dashboard */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-surface-500">
             <Link 
               to="/workers" 
               className="inline-flex items-center gap-1.5 font-semibold text-brand-700 hover:text-brand-800 hover:underline"
@@ -106,7 +122,7 @@ export function Home() {
 
       {/* 3.5. AI IMAGE GENERATION STATUS AREA */}
       {task && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-4">
+        <section className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 pt-6">
           <GenerationStatus
             task={task}
             onRetry={retryTask}
@@ -116,15 +132,15 @@ export function Home() {
       )}
 
       {/* 3.3. IMAGE GALLERY SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
+      <section className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 py-10 flex-1">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-surface-900 tracking-tight flex items-center gap-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-surface-900 tracking-tight flex items-center gap-2.5">
               <Layers className="w-6 h-6 text-brand-600" />
               <span>{searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : 'Kho hình ảnh AI mới nhất'}</span>
             </h2>
-            <p className="text-xs text-surface-500 mt-1">
-              Hình ảnh mới nhất hiển thị trước • Định dạng: [tên ảnh] [member].[worker].jpg
+            <p className="text-xs sm:text-sm text-surface-500 mt-1">
+              Hình ảnh mới nhất hiển thị trước • Quy ước định danh: [tên ảnh] [member].[worker].jpg
             </p>
           </div>
         </div>

@@ -38,25 +38,25 @@ export function Gallery() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+    <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 py-8 flex-1">
       {/* Header bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-surface-200">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-brand-50 text-brand-600 border border-brand-100">
-              <ImageIcon className="w-5 h-5" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-xl bg-brand-50 text-brand-600 border border-brand-100 shadow-2xs">
+              <ImageIcon className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold text-surface-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-surface-900 tracking-tight">
               Image Gallery
             </h1>
           </div>
-          <p className="text-xs text-surface-500 mt-1">
+          <p className="text-xs sm:text-sm text-surface-500 mt-1">
             Toàn bộ bộ sưu tập ảnh bách khoa toàn thư tạo bởi mạng lưới AI Worker
           </p>
         </div>
 
-        {/* Compact search input */}
-        <div className="w-full md:w-96">
+        {/* Search input */}
+        <div className="w-full md:w-[480px] lg:w-[560px]">
           <SearchBar
             initialQuery={searchQuery}
             onSearch={handleSearch}
