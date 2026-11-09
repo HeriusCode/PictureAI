@@ -27,3 +27,19 @@ Truy cập: `http://localhost:5173`
 
 Xem tài liệu chi tiết, hướng dẫn cấu hình API FastAPI, Mock Mode và Docker tại:
 👉 [**frontend/README.md**](./frontend/README.md)
+
+### Build và push Docker bằng GitHub Actions
+
+Workflow [`.github/workflows/docker-publish.yml`](./.github/workflows/docker-publish.yml)
+build context từ `frontend/` và push image lên Docker Hub. Trước khi chạy, thêm hai
+repository secrets trong GitHub:
+
+- `DOCKERHUB_USERNAME`: tên tài khoản Docker Hub, ví dụ `herius`
+- `DOCKERHUB_TOKEN`: Docker Hub access token, không dùng mật khẩu tài khoản
+
+Workflow tự chạy khi push vào `main`. Có thể chạy thủ công tại tab **Actions** và
+chọn tag, API URL, cùng chế độ mock. Image mặc định là:
+
+```text
+herius/pictureai:tagname
+```
