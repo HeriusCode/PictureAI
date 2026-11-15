@@ -8,7 +8,7 @@ import {
   normalizeStatistics
 } from '../src/services/apiAdapter.js';
 
-const baseUrl = 'http://100.74.215.64:8000';
+const baseUrl = 'http://backend.example:8000';
 
 test('maps paginated backend images and resolves relative file URLs', () => {
   const page = normalizeImagePage({
@@ -23,9 +23,23 @@ test('maps paginated backend images and resolves relative file URLs', () => {
     file_url: '/files/7',
     image_id: 7,
     image_name: 'red fox.jpg',
-    image_url: 'http://100.74.215.64:8000/files/7',
+    image_url: 'http://backend.example:8000/files/7',
     worker_id: null
   });
+});
+
+test('keeps relative image URLs on the frontend origin when API base is empty', () => {
+  const page = normalizeImagePage({
+    items: [{ id: 8, filename: 'blue bird.jpg', file_url: '/api/v1/images/8/file' }]
+  }, '', 50);
+  assert.equal(page.images[0].image_url, '/api/v1/images/8/file');
+});
+
+test('routes absolute backend API image URLs through the frontend proxy', () => {
+  const page = normalizeImagePage({
+    items: [{ id: 8, filename: 'blue bird.jpg', file_url: 'http://backend.example:8000/api/v1/images/8/file' }]
+  }, '', 50);
+  assert.equal(page.images[0].image_url, '/api/v1/images/8/file');
 });
 
 test('keeps the task ID returned when search starts generation', () => {

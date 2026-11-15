@@ -37,12 +37,11 @@ repository secrets trong GitHub:
 - `DOCKERHUB_USERNAME`: tên tài khoản Docker Hub, ví dụ `herius`
 - `DOCKERHUB_TOKEN`: Docker Hub access token, không dùng mật khẩu tài khoản
 
-Có thể đặt repository variable `VITE_API_BASE_URL` thành URL backend mà trình duyệt truy cập được
-(ví dụ `http://100.74.215.64:8000`). Khi chạy workflow thủ công, có thể nhập URL
-trong ô `api_base_url`. Nếu không nhập hai giá trị trên, workflow lấy URL từ
-`frontend/.env.example`. File `frontend/.env` không được đưa vào Docker image.
-Sau khi build và push, cần cập nhật container
-đang phục vụ trang để dùng image mới.
+Workflow mặc định build với `VITE_API_BASE_URL` rỗng để trình duyệt gọi API cùng origin.
+Nginx trong image chuyển `/api/` và `/health` đến Backend qua Tailscale. Khi chạy
+workflow thủ công, chỉ nhập `api_base_url` nếu muốn dùng URL API khác. File
+`frontend/.env` không được đưa vào Docker image. Sau khi build và push, cần cập
+nhật container đang phục vụ trang để dùng image mới.
 
 Workflow tự chạy khi push vào `main`. Có thể chạy thủ công tại tab **Actions** và
 chọn tag, API URL, cùng chế độ mock. Image mặc định là:

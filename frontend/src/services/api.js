@@ -10,7 +10,7 @@ import {
 } from './apiAdapter';
 
 // Environment configurations
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 // In development, USE_MOCK is true by default unless VITE_USE_MOCK is explicitly 'false'
 export const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK !== 'false';
 

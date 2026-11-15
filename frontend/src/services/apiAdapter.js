@@ -1,11 +1,22 @@
 // Convert the backend's v1 response fields to the shape used by the UI.
 export function normalizeImage(image, baseUrl) {
   const fileUrl = image.file_url ?? image.image_url ?? '';
+  let imageUrl = !fileUrl || /^[a-z][a-z\d+.-]*:/i.test(fileUrl) || fileUrl.startsWith('//')
+    ? fileUrl
+    : baseUrl
+      ? new URL(fileUrl, `${baseUrl.replace(/\/$/, '')}/`).href
+      : `/${fileUrl.replace(/^\/+/, '')}`;
+  if (!baseUrl && /^https?:\/\//i.test(imageUrl)) {
+    const url = new URL(imageUrl);
+    if (url.pathname.startsWith('/api/')) {
+      imageUrl = `${url.pathname}${url.search}${url.hash}`;
+    }
+  }
   return {
     ...image,
     image_id: image.id ?? image.image_id,
     image_name: image.filename ?? image.image_name ?? '',
-    image_url: fileUrl ? new URL(fileUrl, `${baseUrl.replace(/\/$/, '')}/`).href : '',
+    image_url: imageUrl,
     worker_id: image.worker_id == null ? null : String(image.worker_id)
   };
 }

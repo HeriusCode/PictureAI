@@ -132,8 +132,8 @@ cp .env.example .env
 Nội dung file `.env`:
 
 ```env
-# Địa chỉ gốc của Backend FastAPI (Mặc định: http://localhost:8000)
-VITE_API_BASE_URL=http://localhost:8000
+# Để trống để gọi API cùng origin qua Nginx reverse proxy
+VITE_API_BASE_URL=
 
 # Bật hoặc tắt Mock Data
 VITE_USE_MOCK=false
@@ -158,7 +158,7 @@ Dự án tích hợp sẵn hệ thống Mock Data nội bộ (`src/services/mock
   ```env
   VITE_USE_MOCK=false
   ```
-  Khi tắt, Header hiển thị huy hiệu xanh `Live API Mode`. Axios sẽ thực hiện gọi API trực tiếp đến `VITE_API_BASE_URL`.
+  Khi tắt, Header hiển thị huy hiệu xanh `Live API Mode`. Với `VITE_API_BASE_URL` rỗng, Axios gọi API cùng origin và Nginx chuyển tiếp đến Backend.
 
 ---
 
@@ -189,21 +189,18 @@ Dự án cung cấp `Dockerfile` multi-stage:
 ### Build Docker Image
 
 ```bash
-docker build \
-  --build-arg VITE_API_BASE_URL=http://your-backend-api.com \
-  --build-arg VITE_USE_MOCK=false \
-  -t ai-image-repository-frontend .
+docker build --build-arg VITE_USE_MOCK=false -t ai-image-repository-frontend .
 ```
 
-*URL backend được nhúng vào JavaScript lúc build. Sửa `.env` sau khi build hoặc chỉ truyền `-e VITE_API_BASE_URL=...` khi chạy container sẽ không cập nhật URL này.*
+*URL API được nhúng vào JavaScript lúc build. Giá trị rỗng dùng cùng origin; chỉ truyền `--build-arg VITE_API_BASE_URL=...` nếu muốn gọi URL khác. Sửa `.env` hoặc truyền `-e` sau khi build sẽ không đổi bundle.*
 
 ### Chạy Docker Container
 
 ```bash
-docker run -d -p 8080:80 --name ai-repo-frontend ai-image-repository-frontend
+docker run -d -p 3000:80 --name ai-repo-frontend ai-image-repository-frontend
 ```
 
-Truy cập ứng dụng tại: **`http://localhost:8080`**
+Truy cập ứng dụng tại: **`http://localhost:3000`**. Kiểm tra proxy bằng `curl -i http://localhost:3000/health` và `curl -i http://localhost:3000/api/v1/images?page=1&page_size=50` trên Ubuntu. Container phải kết nối được đến `100.74.215.64:8000` qua Tailscale của host.
 
 ---
 
