@@ -37,6 +37,12 @@ repository secrets trong GitHub:
 - `DOCKERHUB_USERNAME`: tên tài khoản Docker Hub, ví dụ `herius`
 - `DOCKERHUB_TOKEN`: Docker Hub access token, không dùng mật khẩu tài khoản
 
+Đặt repository variable `VITE_API_BASE_URL` thành URL backend mà trình duyệt truy cập được
+(ví dụ `http://100.74.215.64:8000`). Khi chạy workflow thủ công, có thể nhập URL
+trong ô `api_base_url`. Workflow sẽ báo lỗi nếu thiếu URL; file `frontend/.env`
+không được đưa vào Docker image. Sau khi build và push, cần cập nhật container
+đang phục vụ trang để dùng image mới.
+
 Workflow tự chạy khi push vào `main`. Có thể chạy thủ công tại tab **Actions** và
 chọn tag, API URL, cùng chế độ mock. Image mặc định là:
 

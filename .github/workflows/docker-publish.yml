@@ -13,7 +13,6 @@ on:
       api_base_url:
         description: Backend API URL embedded during the frontend build
         required: true
-        default: http://localhost:8000
       use_mock:
         description: Build with mock data enabled
         required: true
@@ -28,12 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ inputs.image_tag || 'tagname' }}
-      API_BASE_URL: ${{ inputs.api_base_url || 'http://localhost:8000' }}
+      API_BASE_URL: ${{ inputs.api_base_url || vars.VITE_API_BASE_URL }}
       USE_MOCK: ${{ inputs.use_mock || 'false' }}
 
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+
+      - name: Check backend URL
+        run: test -n "$API_BASE_URL" || (echo "Set repository variable VITE_API_BASE_URL or supply api_base_url when starting this workflow" >&2; exit 1)
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3

@@ -189,16 +189,13 @@ Dự án cung cấp `Dockerfile` multi-stage:
 ### Build Docker Image
 
 ```bash
-docker build -t ai-image-repository-frontend .
-```
-
-*Nếu muốn truyền địa chỉ Backend thật khi build:*
-```bash
 docker build \
   --build-arg VITE_API_BASE_URL=http://your-backend-api.com \
   --build-arg VITE_USE_MOCK=false \
   -t ai-image-repository-frontend .
 ```
+
+*URL backend được nhúng vào JavaScript lúc build. Sửa `.env` sau khi build hoặc chỉ truyền `-e VITE_API_BASE_URL=...` khi chạy container sẽ không cập nhật URL này.*
 
 ### Chạy Docker Container
 

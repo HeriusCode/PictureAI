@@ -13,12 +13,13 @@ RUN npm ci
 COPY . .
 
 # Accept build arguments for environment variables
-ARG VITE_API_BASE_URL=http://localhost:8000
+ARG VITE_API_BASE_URL
 ARG VITE_USE_MOCK=false
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_USE_MOCK=$VITE_USE_MOCK
 
 # Build production assets
+RUN test -n "$VITE_API_BASE_URL" || (echo "VITE_API_BASE_URL build argument is required" >&2; exit 1)
 RUN npm run build
 
 # ==========================================
