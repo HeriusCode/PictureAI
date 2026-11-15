@@ -12,7 +12,7 @@ on:
         default: tagname
       api_base_url:
         description: Backend API URL embedded during the frontend build
-        required: true
+        required: false
       use_mock:
         description: Build with mock data enabled
         required: true
@@ -34,8 +34,15 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Check backend URL
-        run: test -n "$API_BASE_URL" || (echo "Set repository variable VITE_API_BASE_URL or supply api_base_url when starting this workflow" >&2; exit 1)
+      - name: Resolve backend URL
+        id: backend_url
+        run: |
+          url="$API_BASE_URL"
+          if [ -z "$url" ]; then
+            url="$(sed -n 's/^VITE_API_BASE_URL=//p' frontend/.env.example | head -n 1)"
+          fi
+          test -n "$url" || (echo "Set VITE_API_BASE_URL in frontend/.env.example, a repository variable, or the workflow input" >&2; exit 1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -51,5 +58,5 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/pictureai:${{ env.IMAGE_TAG }}
           build-args: |
-            VITE_API_BASE_URL=${{ env.API_BASE_URL }}
+            VITE_API_BASE_URL=${{ steps.backend_url.outputs.url }}
             VITE_USE_MOCK=${{ env.USE_MOCK }}
