@@ -10,8 +10,8 @@
 ## 1. GIỚI THIỆU MODULE FRONTEND
 
 Module 4 là giao diện người dùng trung tâm của hệ thống AI Image Repository, chịu trách nhiệm:
-- **Tìm kiếm hình ảnh:** Tìm kiếm tức thì trong kho lưu trữ theo từ khóa tiếng Anh (`GET /api/images/search?q=...`).
-- **Điều phối sinh ảnh AI (Distributed AI Generation):** Khi người dùng tìm một hình ảnh chưa tồn tại trong kho, Frontend kích hoạt luồng yêu cầu sinh ảnh đến Backend FastAPI (`POST /api/generation/request`), nhận về `task_id` và theo dõi tiến trình qua cơ chế Polling thời gian thực (`pending` ➔ `processing` ➔ `completed` / `failed`).
+- **Tìm kiếm hình ảnh:** Tìm kiếm tức thì trong kho lưu trữ theo từ khóa tiếng Anh (`GET /api/v1/images/search?q=...`).
+- **Điều phối sinh ảnh AI (Distributed AI Generation):** Khi người dùng tìm một hình ảnh chưa tồn tại trong kho, Frontend kích hoạt luồng yêu cầu sinh ảnh đến Backend FastAPI (`POST /api/v1/tasks`), nhận về `task_id` và theo dõi tiến trình qua cơ chế Polling thời gian thực (`pending` ➔ `processing` ➔ `completed` / `failed`).
 - **Kho lưu trữ hình ảnh (Image Gallery):** Hiển thị hình ảnh dạng lưới đáp ứng (Responsive Grid: 2 cột Mobile, 3–4 cột Tablet, 5–6 cột Desktop), phân trang tối đa 50 ảnh/trang, sắp xếp theo ảnh mới nhất, phân tích định danh Worker và xem modal chi tiết ảnh chất lượng cao.
 - **Giám sát cụm máy trạm (AI Worker Dashboard):** Theo dõi trạng thái hoạt động của các máy trạm AI Worker (`Online`, `Busy`, `Offline`), xem tên máy tính, GPU, heartbeat và tác vụ đang xử lý.
 - **Thống kê sản lượng (Worker Statistics):** Hiển thị các chỉ số tổng quan và biểu đồ cột trực quan về sản lượng ảnh do từng Worker tạo ra.
@@ -212,7 +212,7 @@ Truy cập ứng dụng tại: **`http://localhost:8080`**
 Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend và Backend FastAPI:
 
 ### 1. Lấy danh sách ảnh phân trang
-- **Endpoint:** `GET /api/images`
+- **Endpoint:** `GET /api/v1/images`
 - **Query Params:**
   - `page` (int, default: 1)
   - `limit` (int, default: 50)
@@ -238,7 +238,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 2. Tìm kiếm ảnh
-- **Endpoint:** `GET /api/images/search`
+- **Endpoint:** `GET /api/v1/images/search`
 - **Query Params:**
   - `q` (string, e.g. `black dog`)
 - **Response (200 OK):**
@@ -260,7 +260,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 3. Thống kê sản lượng hình ảnh
-- **Endpoint:** `GET /api/images/stats`
+- **Endpoint:** `GET /api/v1/statistics`
 - **Response (200 OK):**
   ```json
   {
@@ -280,7 +280,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 4. Danh sách AI Worker
-- **Endpoint:** `GET /api/workers`
+- **Endpoint:** `GET /api/v1/workers`
 - **Response (200 OK):**
   ```json
   [
@@ -297,7 +297,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 5. Yêu cầu tạo ảnh mới
-- **Endpoint:** `POST /api/generation/request`
+- **Endpoint:** `POST /api/v1/tasks`
 - **Request Body:**
   ```json
   {
@@ -314,7 +314,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 6. Kiểm tra trạng thái tác vụ sinh ảnh (Polling)
-- **Endpoint:** `GET /api/generation/{task_id}`
+- **Endpoint:** `GET /api/v1/tasks/{task_id}`
 - **Response khi đang xử lý:**
   ```json
   {
@@ -351,7 +351,7 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```
 
 ### 7. Trạng thái sức khỏe hệ sinh thái (Health check)
-- **Endpoint:** `GET /api/health`
+- **Endpoint:** `GET /health`
 - **Response (200 OK):**
   ```json
   {

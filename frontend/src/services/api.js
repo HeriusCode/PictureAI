@@ -34,7 +34,7 @@ const simulateDelay = (ms = 350) => new Promise(resolve => setTimeout(resolve, m
 
 /**
  * 1. Lấy danh sách ảnh phân trang
- * GET /api/images?page=1&limit=50&sort=newest
+ * GET /api/v1/images?page=1&limit=50&sort=newest
  */
 export async function fetchImages({ page = 1, limit = 50, sort = 'newest' } = {}) {
   if (IS_MOCK_MODE) {
@@ -42,14 +42,14 @@ export async function fetchImages({ page = 1, limit = 50, sort = 'newest' } = {}
     return mockRepo.getImages(page, limit, sort);
   }
 
-  return apiClient.get('/api/images', {
+  return apiClient.get('/api/v1/images', {
     params: { page, limit, sort }
   });
 }
 
 /**
  * 2. Tìm kiếm ảnh theo từ khóa tiếng Anh
- * GET /api/images/search?q=black%20dog
+ * GET /api/v1/images/search?q=black%20dog
  */
 export async function searchImages(query) {
   if (IS_MOCK_MODE) {
@@ -62,14 +62,14 @@ export async function searchImages(query) {
     };
   }
 
-  return apiClient.get('/api/images/search', {
+  return apiClient.get('/api/v1/images/search', {
     params: { q: query }
   });
 }
 
 /**
  * 3. Lấy thông tin thống kê kho ảnh và Worker
- * GET /api/images/stats
+ * GET /api/v1/statistics
  */
 export async function fetchImageStats() {
   if (IS_MOCK_MODE) {
@@ -77,12 +77,12 @@ export async function fetchImageStats() {
     return mockRepo.getStats();
   }
 
-  return apiClient.get('/api/images/stats');
+  return apiClient.get('/api/v1/statistics');
 }
 
 /**
  * 4. Lấy danh sách Worker phân tán
- * GET /api/workers
+ * GET /api/v1/workers
  */
 export async function fetchWorkers() {
   if (IS_MOCK_MODE) {
@@ -90,12 +90,12 @@ export async function fetchWorkers() {
     return mockRepo.getWorkers();
   }
 
-  return apiClient.get('/api/workers');
+  return apiClient.get('/api/v1/workers');
 }
 
 /**
  * 5. Gửi yêu cầu tạo ảnh mới khi không tìm thấy
- * POST /api/generation/request
+ * POST /api/v1/tasks
  * Body: { prompt: "purple elephant" }
  */
 export async function requestGeneration(prompt) {
@@ -108,14 +108,14 @@ export async function requestGeneration(prompt) {
     return mockRepo.createTask(prompt);
   }
 
-  return apiClient.post('/api/generation/request', {
+  return apiClient.post('/api/v1/tasks', {
     prompt: prompt.trim()
   });
 }
 
 /**
  * 6. Kiểm tra trạng thái tác vụ tạo ảnh (Polling)
- * GET /api/generation/{task_id}
+ * GET /api/v1/tasks/{task_id}
  */
 export async function checkGenerationStatus(taskId) {
   if (!taskId) throw new Error('Missing taskId');
@@ -125,12 +125,12 @@ export async function checkGenerationStatus(taskId) {
     return mockRepo.getTask(taskId);
   }
 
-  return apiClient.get(`/api/generation/${taskId}`);
+  return apiClient.get(`/api/v1/tasks/${encodeURIComponent(taskId)}`);
 }
 
 /**
  * 7. Kiểm tra trạng thái hệ sinh thái (Health check)
- * GET /api/health hoặc kiểm tra kết nối
+ * GET /health hoặc kiểm tra kết nối
  */
 export async function checkSystemHealth() {
   if (IS_MOCK_MODE) {
@@ -143,7 +143,7 @@ export async function checkSystemHealth() {
   }
 
   try {
-    const res = await apiClient.get('/api/health');
+    const res = await apiClient.get('/health');
     return {
       status: res.status || 'operational',
       mode: 'live',

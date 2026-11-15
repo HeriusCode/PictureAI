@@ -89,12 +89,12 @@ class GenerationRequest(BaseModel):
 
 # ----------------- API ENDPOINTS -----------------
 
-@app.get("/api/health")
+@app.get("/health")
 def health_check():
     """Kiểm tra sức khỏe hệ thống Backend"""
     return {"status": "operational", "timestamp": datetime.utcnow().isoformat()}
 
-@app.get("/api/images")
+@app.get("/api/v1/images")
 def get_images(page: int = 1, limit: int = 50, sort: str = "newest"):
     """1. Lấy danh sách ảnh phân trang (mặc định mới nhất trước)"""
     sorted_images = sorted(
@@ -116,7 +116,7 @@ def get_images(page: int = 1, limit: int = 50, sort: str = "newest"):
         "images": paginated
     }
 
-@app.get("/api/images/search")
+@app.get("/api/v1/images/search")
 def search_images(q: str = Query(..., description="Từ khóa tìm kiếm tiếng Anh")):
     """2. Tìm kiếm ảnh theo từ khóa"""
     q_clean = q.strip().lower()
@@ -127,7 +127,7 @@ def search_images(q: str = Query(..., description="Từ khóa tìm kiếm tiến
         "images": results
     }
 
-@app.get("/api/images/stats")
+@app.get("/api/v1/statistics")
 def get_stats():
     """3. Thống kê sản lượng hình ảnh theo Worker"""
     total_images = len(IMAGES_DB)
@@ -152,7 +152,7 @@ def get_stats():
         "workers": worker_stats
     }
 
-@app.get("/api/workers")
+@app.get("/api/v1/workers")
 def get_workers():
     """4. Danh sách AI Worker đang kết nối cụm phân tán"""
     return WORKERS_DB
@@ -182,7 +182,7 @@ def simulate_worker_processing(task_id: str, prompt: str):
         TASKS_DB[task_id]["status"] = "completed"
         TASKS_DB[task_id]["images"] = [new_image]
 
-@app.post("/api/generation/request")
+@app.post("/api/v1/tasks")
 def request_generation(req: GenerationRequest, background_tasks: BackgroundTasks):
     """5. Yêu cầu tạo ảnh mới khi tìm kiếm không có"""
     task_id = "task-" + str(uuid.uuid4())[:8]
@@ -204,7 +204,7 @@ def request_generation(req: GenerationRequest, background_tasks: BackgroundTasks
         "assigned_worker": assigned_worker
     }
 
-@app.get("/api/generation/{task_id}")
+@app.get("/api/v1/tasks/{task_id}")
 def check_generation(task_id: str):
     """6. Kiểm tra trạng thái tác vụ sinh ảnh (Polling/SSE)"""
     if task_id not in TASKS_DB:
