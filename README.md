@@ -39,7 +39,9 @@ repository secrets trong GitHub:
 
 Đặt repository variable `VITE_API_BASE_URL` thành URL backend mà trình duyệt truy cập được
 (ví dụ `http://100.74.215.64:8000`). Khi chạy workflow thủ công, có thể nhập URL
-trong ô `api_base_url`. Workflow sẽ báo lỗi nếu thiếu URL; file `frontend/.env`
+trong ô `api_base_url`. Nếu không cung cấp URL, workflow dùng
+`http://localhost:8000` để bảo đảm các lần build tự động vẫn hoàn tất; hãy cấu hình
+repository variable hoặc input để container kết nối đúng backend. File `frontend/.env`
 không được đưa vào Docker image. Sau khi build và push, cần cập nhật container
 đang phục vụ trang để dùng image mới.
 

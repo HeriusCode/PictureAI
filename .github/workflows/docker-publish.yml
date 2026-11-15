@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ inputs.image_tag || 'tagname' }}
-      API_BASE_URL: ${{ inputs.api_base_url || vars.VITE_API_BASE_URL }}
+      API_BASE_URL: ${{ inputs.api_base_url || vars.VITE_API_BASE_URL || 'http://localhost:8000' }}
       USE_MOCK: ${{ inputs.use_mock || 'false' }}
 
     steps:
