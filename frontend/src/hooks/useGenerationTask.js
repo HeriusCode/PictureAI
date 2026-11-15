@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { requestGeneration, checkGenerationStatus } from '../services/api';
+import { requestGeneration, checkGenerationStatus, fetchImageById } from '../services/api';
 
 const DEFAULT_POLL_INTERVAL = 2500;
 
@@ -11,7 +11,10 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
   const [task, setTask] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const pollTimerRef = useRef(null);
+  const initialTimerRef = useRef(null);
   const isPollingRef = useRef(false);
+  const activeTaskIdRef = useRef(null);
+  const pollInFlightRef = useRef(false);
 
   // Clear any existing poll timer
   const stopPolling = useCallback(() => {
@@ -19,26 +22,44 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
       clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
     }
+    if (initialTimerRef.current) {
+      clearTimeout(initialTimerRef.current);
+      initialTimerRef.current = null;
+    }
     isPollingRef.current = false;
+    activeTaskIdRef.current = null;
   }, []);
 
   // Poll function to check backend status
   const pollStatus = useCallback(async (taskId) => {
-    if (!taskId || !isPollingRef.current) return;
+    if (!taskId || !isPollingRef.current || activeTaskIdRef.current !== taskId || pollInFlightRef.current) return;
+    pollInFlightRef.current = true;
 
     try {
       const result = await checkGenerationStatus(taskId);
-      
+      if (!isPollingRef.current || activeTaskIdRef.current !== taskId) return;
+
+      let images = result.images || [];
+      if (result.status === 'completed' && images.length === 0 && result.result_image_id) {
+        try {
+          const image = await fetchImageById(result.result_image_id);
+          if (image) images = [image];
+        } catch (err) {
+          console.error('Failed to load generated image:', err);
+        }
+      }
+      if (!isPollingRef.current || activeTaskIdRef.current !== taskId) return;
       setTask((prev) => ({
         ...prev,
         ...result,
+        images,
         lastChecked: new Date().toISOString()
       }));
 
       if (result.status === 'completed') {
         stopPolling();
         if (onSuccess) {
-          onSuccess(result.images || []);
+          onSuccess(images);
         }
       } else if (result.status === 'failed') {
         stopPolling();
@@ -49,6 +70,8 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
     } catch (err) {
       console.error('Error polling generation status:', err);
       // We don't immediately fail on a single network blip, continue polling unless consecutive failures
+    } finally {
+      pollInFlightRef.current = false;
     }
   }, [stopPolling, onSuccess, onError]);
 
@@ -56,9 +79,10 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
   const startPolling = useCallback((taskId) => {
     stopPolling();
     isPollingRef.current = true;
+    activeTaskIdRef.current = taskId;
 
     // Check once immediately after 1.5 seconds
-    const initialTimer = setTimeout(() => {
+    initialTimerRef.current = setTimeout(() => {
       pollStatus(taskId);
     }, 1500);
 
@@ -67,8 +91,14 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
       pollStatus(taskId);
     }, DEFAULT_POLL_INTERVAL);
 
-    return () => clearTimeout(initialTimer);
   }, [stopPolling, pollStatus]);
+
+  // Search can create a task before the user presses the Generate button.
+  const trackTask = useCallback((taskId, prompt) => {
+    if (!taskId || activeTaskIdRef.current === taskId) return;
+    setTask({ task_id: taskId, prompt, status: 'pending', images: [] });
+    startPolling(taskId);
+  }, [startPolling]);
 
   // Initiate generation request
   const startGeneration = useCallback(async (prompt) => {
@@ -81,7 +111,7 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
       const response = await requestGeneration(prompt.trim());
       
       const initialTaskState = {
-        task_id: response.task_id,
+        ...response,
         prompt: prompt.trim(),
         status: response.status || 'pending',
         assigned_worker: response.assigned_worker || null,
@@ -126,6 +156,7 @@ export function useGenerationTask({ onSuccess, onError } = {}) {
     task,
     isSubmitting,
     startGeneration,
+    trackTask,
     resetTask,
     retryTask: () => {
       if (task?.prompt) {

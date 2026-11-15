@@ -209,26 +209,26 @@ Truy cập ứng dụng tại: **`http://localhost:8080`**
 
 ## 11. DANH SÁCH API CẦN BACKEND CUNG CẤP
 
-Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend và Backend FastAPI:
+Dưới đây là các trường mà Frontend đọc từ Backend FastAPI v1. `apiAdapter.js` chuyển chúng sang tên trường dùng trong giao diện. Các JSON bên dưới là ví dụ minh họa theo thông tin đã được cung cấp; cần đối chiếu `/docs` của backend thật khi schema thay đổi.
 
 ### 1. Lấy danh sách ảnh phân trang
 - **Endpoint:** `GET /api/v1/images`
 - **Query Params:**
   - `page` (int, default: 1)
-  - `limit` (int, default: 50)
+  - `page_size` (int, default: 50)
   - `sort` (string: `newest` | `oldest`, default: `newest`)
 - **Response (200 OK):**
   ```json
   {
     "page": 1,
-    "limit": 50,
+    "page_size": 50,
     "total": 120,
     "total_pages": 3,
-    "images": [
+    "items": [
       {
-        "image_id": "uuid-string",
-        "image_name": "black dog 2.1.jpg",
-        "image_url": "https://storage.domain.com/images/black_dog_2.1.jpg",
+        "id": "uuid-string",
+        "filename": "black dog 2.1.jpg",
+        "file_url": "https://storage.domain.com/images/black_dog_2.1.jpg",
         "worker_id": "2.1",
         "member_id": 2,
         "created_at": "2026-11-09T07:15:00Z"
@@ -244,13 +244,12 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
 - **Response (200 OK):**
   ```json
   {
-    "query": "black dog",
-    "total": 1,
-    "images": [
+    "found": true,
+    "results": [
       {
-        "image_id": "uuid-string",
-        "image_name": "black dog 2.1.jpg",
-        "image_url": "https://storage.domain.com/images/black_dog_2.1.jpg",
+        "id": "uuid-string",
+        "filename": "black dog 2.1.jpg",
+        "file_url": "https://storage.domain.com/images/black_dog_2.1.jpg",
         "worker_id": "2.1",
         "member_id": 2,
         "created_at": "2026-11-09T07:15:00Z"
@@ -259,15 +258,18 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   }
   ```
 
+Khi không tìm thấy ảnh, Backend có thể trả `{"found": false, "results": [], "task_id": "task-uuid-8f92"}`; Frontend sẽ theo dõi task này mà không gửi thêm POST.
+
 ### 3. Thống kê sản lượng hình ảnh
 - **Endpoint:** `GET /api/v1/statistics`
 - **Response (200 OK):**
   ```json
   {
     "total_images": 120,
+    "total_tasks": 140,
     "total_workers": 6,
     "active_workers": 5,
-    "workers": [
+    "worker_stats": [
       {
         "worker_id": "2.1",
         "member_id": 2,
@@ -275,7 +277,8 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
         "status": "online",
         "total_images": 54
       }
-    ]
+    ],
+    "member_stats": []
   }
   ```
 
@@ -285,11 +288,11 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
   ```json
   [
     {
-      "worker_id": "2.1",
+      "id": "2.1",
       "member_id": 2,
       "machine_name": "workstation-alienware-m18",
       "status": "online",
-      "total_images": 54,
+      "total_tasks_completed": 54,
       "current_task": "Idle (Standby)",
       "last_heartbeat": "2026-11-09T07:35:10Z"
     }
@@ -307,9 +310,9 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
 - **Response (202 Accepted / 200 OK):**
   ```json
   {
-    "task_id": "task-uuid-8f92",
+    "id": "task-uuid-8f92",
     "status": "pending",
-    "assigned_worker": "2.1"
+    "assigned_worker_id": "2.1"
   }
   ```
 
@@ -318,44 +321,39 @@ Dưới đây là hợp đồng giao tiếp API (API Contract) giữa Frontend v
 - **Response khi đang xử lý:**
   ```json
   {
-    "task_id": "task-uuid-8f92",
+    "id": "task-uuid-8f92",
     "status": "processing",
-    "assigned_worker": "2.1"
+    "assigned_worker_id": "2.1"
   }
   ```
 - **Response khi hoàn thành:**
   ```json
   {
-    "task_id": "task-uuid-8f92",
+    "id": "task-uuid-8f92",
     "status": "completed",
-    "assigned_worker": "2.1",
-    "images": [
-      {
-        "image_id": "new-img-uuid",
-        "image_name": "purple elephant 2.1.jpg",
-        "image_url": "https://storage.domain.com/images/purple_elephant_2.1.jpg",
-        "worker_id": "2.1",
-        "member_id": 2,
-        "created_at": "2026-11-09T07:40:00Z"
-      }
-    ]
+    "assigned_worker_id": "2.1",
+    "result_image_id": "new-img-uuid"
   }
   ```
 - **Response khi thất bại:**
   ```json
   {
-    "task_id": "task-uuid-8f92",
+    "id": "task-uuid-8f92",
     "status": "failed",
-    "error": "CUDA out of memory error on Worker node 2.1"
+    "error_message": "CUDA out of memory error on Worker node 2.1"
   }
   ```
 
-### 7. Trạng thái sức khỏe hệ sinh thái (Health check)
+### 7. Lấy ảnh đã tạo theo ID
+- **Endpoint:** `GET /api/v1/images/{image_id}`
+- Frontend gọi endpoint này khi task hoàn thành và trả `result_image_id`. Ảnh trả về cần có `id`, `filename`, `file_url`.
+
+### 8. Trạng thái sức khỏe hệ sinh thái (Health check)
 - **Endpoint:** `GET /health`
 - **Response (200 OK):**
   ```json
   {
-    "status": "operational",
+    "status": "healthy",
     "timestamp": "2026-11-09T07:40:00Z"
   }
   ```

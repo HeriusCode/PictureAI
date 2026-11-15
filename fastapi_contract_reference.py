@@ -1,7 +1,8 @@
 """
-AI Image Repository - FastAPI Backend Contract Reference
+AI Image Repository - FastAPI demo backend (in-memory sample responses)
 Dành cho thành viên phụ trách Backend tham khảo để kết nối với Module 4 Frontend.
 Chạy thử: uvicorn fastapi_contract_reference:app --reload --port 8000
+Response fields here are illustrative; use the deployed backend /docs for the v1 schema.
 """
 
 from fastapi import FastAPI, Query, HTTPException, BackgroundTasks

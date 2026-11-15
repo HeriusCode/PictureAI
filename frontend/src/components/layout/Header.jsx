@@ -30,7 +30,7 @@ export function Header() {
     { name: 'Statistics', path: '/statistics', icon: BarChart3 },
   ];
 
-  const isHealthy = systemHealth.status === 'operational';
+  const isHealthy = systemHealth.status === 'operational' || systemHealth.status === 'healthy';
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-surface-200 shadow-xs transition-all">

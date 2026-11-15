@@ -173,7 +173,7 @@ export function WorkerStats({ stats, loading = false, error = null }) {
                 return (
                   <tr key={w.worker_id} className="hover:bg-surface-50 transition-colors">
                     <td className="py-2.5 font-bold font-mono text-surface-900">Worker {w.worker_id}</td>
-                    <td className="py-2.5 text-surface-600">Thành viên #{w.member_id || w.worker_id.split('.')[0]}</td>
+                    <td className="py-2.5 text-surface-600">Thành viên #{w.member_id || String(w.worker_id).split('.')[0]}</td>
                     <td className="py-2.5 font-mono text-surface-500">{w.machine_name || 'Worker Node'}</td>
                     <td className="py-2.5 text-right font-bold text-brand-600">{count}</td>
                     <td className="py-2.5 text-right text-surface-500">{percentOfTotal}%</td>

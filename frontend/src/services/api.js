@@ -1,5 +1,13 @@
 import axios from 'axios';
 import { mockRepo } from './mockData';
+import {
+  normalizeImage,
+  normalizeImagePage,
+  normalizeSearch,
+  normalizeTask,
+  normalizeWorker,
+  normalizeStatistics
+} from './apiAdapter';
 
 // Environment configurations
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -34,7 +42,7 @@ const simulateDelay = (ms = 350) => new Promise(resolve => setTimeout(resolve, m
 
 /**
  * 1. Lấy danh sách ảnh phân trang
- * GET /api/v1/images?page=1&limit=50&sort=newest
+ * GET /api/v1/images?page=1&page_size=50&sort=newest
  */
 export async function fetchImages({ page = 1, limit = 50, sort = 'newest' } = {}) {
   if (IS_MOCK_MODE) {
@@ -42,9 +50,10 @@ export async function fetchImages({ page = 1, limit = 50, sort = 'newest' } = {}
     return mockRepo.getImages(page, limit, sort);
   }
 
-  return apiClient.get('/api/v1/images', {
-    params: { page, limit, sort }
+  const response = await apiClient.get('/api/v1/images', {
+    params: { page, page_size: limit, sort }
   });
+  return normalizeImagePage(response, API_BASE_URL, limit);
 }
 
 /**
@@ -58,13 +67,16 @@ export async function searchImages(query) {
     return {
       query,
       total: results.length,
-      images: results
+      images: results,
+      found: results.length > 0,
+      task_id: null
     };
   }
 
-  return apiClient.get('/api/v1/images/search', {
+  const response = await apiClient.get('/api/v1/images/search', {
     params: { q: query }
   });
+  return normalizeSearch(response, API_BASE_URL);
 }
 
 /**
@@ -77,7 +89,7 @@ export async function fetchImageStats() {
     return mockRepo.getStats();
   }
 
-  return apiClient.get('/api/v1/statistics');
+  return normalizeStatistics(await apiClient.get('/api/v1/statistics'));
 }
 
 /**
@@ -90,7 +102,9 @@ export async function fetchWorkers() {
     return mockRepo.getWorkers();
   }
 
-  return apiClient.get('/api/v1/workers');
+  const response = await apiClient.get('/api/v1/workers');
+  return (Array.isArray(response) ? response : response.items ?? response.workers ?? [])
+    .map(normalizeWorker);
 }
 
 /**
@@ -108,9 +122,12 @@ export async function requestGeneration(prompt) {
     return mockRepo.createTask(prompt);
   }
 
-  return apiClient.post('/api/v1/tasks', {
+  const response = await apiClient.post('/api/v1/tasks', {
     prompt: prompt.trim()
   });
+  const task = normalizeTask(response, API_BASE_URL);
+  if (!task.task_id) throw new Error('Backend không trả về ID tác vụ');
+  return task;
 }
 
 /**
@@ -125,7 +142,21 @@ export async function checkGenerationStatus(taskId) {
     return mockRepo.getTask(taskId);
   }
 
-  return apiClient.get(`/api/v1/tasks/${encodeURIComponent(taskId)}`);
+  return normalizeTask(
+    await apiClient.get(`/api/v1/tasks/${encodeURIComponent(taskId)}`),
+    API_BASE_URL
+  );
+}
+
+export async function fetchImageById(imageId) {
+  if (!imageId) throw new Error('Missing imageId');
+  if (IS_MOCK_MODE) {
+    return mockRepo.images.find(image => image.image_id === imageId) ?? null;
+  }
+  return normalizeImage(
+    await apiClient.get(`/api/v1/images/${encodeURIComponent(imageId)}`),
+    API_BASE_URL
+  );
 }
 
 /**
@@ -145,7 +176,7 @@ export async function checkSystemHealth() {
   try {
     const res = await apiClient.get('/health');
     return {
-      status: res.status || 'operational',
+      status: res.status || 'healthy',
       mode: 'live',
       backend_connected: true,
       timestamp: new Date().toISOString()
@@ -167,6 +198,7 @@ export default {
   fetchWorkers,
   requestGeneration,
   checkGenerationStatus,
+  fetchImageById,
   checkSystemHealth,
   IS_MOCK_MODE,
   API_BASE_URL

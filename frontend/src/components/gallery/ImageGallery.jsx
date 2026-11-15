@@ -19,7 +19,8 @@ export function ImageGallery({
   emptyTitle = 'Chưa có hình ảnh nào',
   emptyDescription = 'Kho lưu trữ hiện tại chưa có ảnh phù hợp hoặc chưa có Worker tải lên.',
   onTriggerGenerate,
-  searchQuery = ''
+  searchQuery = '',
+  pendingTaskId = null
 }) {
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -92,7 +93,11 @@ export function ImageGallery({
             : emptyDescription}
         </p>
 
-        {searchQuery && onTriggerGenerate && (
+        {searchQuery && pendingTaskId && (
+          <p className="text-sm text-brand-700">Ảnh đang được tạo. Mã tác vụ: {pendingTaskId}</p>
+        )}
+
+        {searchQuery && !pendingTaskId && onTriggerGenerate && (
           <button
             onClick={() => onTriggerGenerate(searchQuery)}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-semibold text-sm rounded-xl shadow-md shadow-brand-500/20 transition-all transform hover:-translate-y-0.5"

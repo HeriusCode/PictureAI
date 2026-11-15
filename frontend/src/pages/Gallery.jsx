@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import SearchBar from '../components/search/SearchBar';
 import ImageGallery from '../components/gallery/ImageGallery';
@@ -16,6 +16,7 @@ export function Gallery() {
     totalImages,
     sort,
     searchQuery,
+    searchTaskId,
     isSearching,
     loading,
     error,
@@ -23,19 +24,29 @@ export function Gallery() {
     handleClearSearch,
     handlePageChange,
     handleSortChange,
+    showGeneratedImages,
     reload
   } = useImages({ initialLimit: 50 });
 
   const {
     task,
     startGeneration,
+    trackTask,
     resetTask,
     retryTask
   } = useGenerationTask({
-    onSuccess: () => {
-      reload();
+    onSuccess: (createdImages) => {
+      if (!showGeneratedImages(createdImages)) reload();
     }
   });
+
+  const trackedSearchTaskIdRef = useRef(null);
+  useEffect(() => {
+    if (searchTaskId && trackedSearchTaskIdRef.current !== searchTaskId) {
+      trackedSearchTaskIdRef.current = searchTaskId;
+      trackTask(searchTaskId, searchQuery);
+    }
+  }, [searchTaskId, searchQuery, trackTask]);
 
   return (
     <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-12 py-8 flex-1">
@@ -89,6 +100,7 @@ export function Gallery() {
           sort={sort}
           onSortChange={handleSortChange}
           searchQuery={searchQuery}
+          pendingTaskId={searchTaskId}
           onTriggerGenerate={(prompt) => startGeneration(prompt)}
         />
 

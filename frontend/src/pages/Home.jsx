@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, Layers, Cpu, ArrowRight, Palette, Zap, Search } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Sparkles, Layers, Cpu, ArrowRight, Palette, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SearchBar from '../components/search/SearchBar';
 import ImageGallery from '../components/gallery/ImageGallery';
@@ -17,6 +17,7 @@ export function Home() {
     totalImages,
     sort,
     searchQuery,
+    searchTaskId,
     isSearching,
     loading,
     error,
@@ -24,6 +25,7 @@ export function Home() {
     handleClearSearch,
     handlePageChange,
     handleSortChange,
+    showGeneratedImages,
     reload
   } = useImages({ initialLimit: 50 });
 
@@ -31,14 +33,22 @@ export function Home() {
   const {
     task,
     startGeneration,
+    trackTask,
     resetTask,
     retryTask
   } = useGenerationTask({
-    onSuccess: () => {
-      // Rule 8: Khi tác vụ tạo ảnh hoàn thành phải tự cập nhật kết quả
-      reload();
+    onSuccess: (createdImages) => {
+      if (!showGeneratedImages(createdImages)) reload();
     }
   });
+
+  const trackedSearchTaskIdRef = useRef(null);
+  useEffect(() => {
+    if (searchTaskId && trackedSearchTaskIdRef.current !== searchTaskId) {
+      trackedSearchTaskIdRef.current = searchTaskId;
+      trackTask(searchTaskId, searchQuery);
+    }
+  }, [searchTaskId, searchQuery, trackTask]);
 
   // Triggered when search has 0 results or user wants to create
   const handleTriggerGenerate = (promptText) => {
@@ -154,6 +164,7 @@ export function Home() {
           sort={sort}
           onSortChange={handleSortChange}
           searchQuery={searchQuery}
+          pendingTaskId={searchTaskId}
           onTriggerGenerate={handleTriggerGenerate}
         />
 

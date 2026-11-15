@@ -13,6 +13,7 @@ export function useImages({ initialLimit = 50 } = {}) {
   const [sort, setSort] = useState('newest');
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTaskId, setSearchTaskId] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -29,12 +30,14 @@ export function useImages({ initialLimit = 50 } = {}) {
         setIsSearching(true);
         const result = await searchImages(searchQuery.trim());
         const searchResults = result.images || [];
+        setSearchTaskId(result.found === false ? result.task_id : null);
         setImages(searchResults);
         setTotalImages(result.total || searchResults.length);
         setTotalPages(Math.ceil((result.total || searchResults.length) / limit) || 1);
         setHasSearched(true);
       } else {
         setIsSearching(false);
+        setSearchTaskId(null);
         setHasSearched(false);
         const data = await fetchImages({ page, limit, sort });
         setImages(data.images || []);
@@ -56,12 +59,14 @@ export function useImages({ initialLimit = 50 } = {}) {
 
   // Handle new search query (resets page to 1)
   const handleSearch = useCallback((query) => {
+    setSearchTaskId(null);
     setSearchQuery(query);
     setPage(1); // Rule 7: Reset page to 1 on new search
   }, []);
 
   // Clear search filter
   const handleClearSearch = useCallback(() => {
+    setSearchTaskId(null);
     setSearchQuery('');
     setPage(1);
     setHasSearched(false);
@@ -81,6 +86,17 @@ export function useImages({ initialLimit = 50 } = {}) {
     setPage(1);
   }, []);
 
+  const showGeneratedImages = useCallback((createdImages) => {
+    if (!createdImages?.length) return false;
+    setImages((current) => [
+      ...createdImages,
+      ...current.filter(image => !createdImages.some(created => created.image_id === image.image_id))
+    ]);
+    setTotalImages((current) => current + createdImages.length);
+    setSearchTaskId(null);
+    return true;
+  }, []);
+
   return {
     images,
     page,
@@ -89,6 +105,7 @@ export function useImages({ initialLimit = 50 } = {}) {
     totalImages,
     sort,
     searchQuery,
+    searchTaskId,
     isSearching,
     hasSearched,
     loading,
@@ -97,6 +114,7 @@ export function useImages({ initialLimit = 50 } = {}) {
     handleClearSearch,
     handlePageChange,
     handleSortChange,
+    showGeneratedImages,
     reload: loadImages
   };
 }

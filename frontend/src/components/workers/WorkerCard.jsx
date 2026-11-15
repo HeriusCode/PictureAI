@@ -9,6 +9,7 @@ export function WorkerCard({ worker }) {
     machine_name,
     status = 'offline',
     total_images = 0,
+    total_tasks_completed,
     current_task = 'Idle',
     last_heartbeat
   } = worker;
@@ -77,10 +78,10 @@ export function WorkerCard({ worker }) {
         {/* Total Images Generated */}
         <div className="flex items-center justify-between">
           <span className="text-surface-500 flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5 text-surface-400" /> Tổng số ảnh đã tạo:
+            <ImageIcon className="w-3.5 h-3.5 text-surface-400" /> Tác vụ hoàn thành:
           </span>
           <span className="font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded">
-            {total_images} ảnh
+            {total_tasks_completed ?? total_images} tác vụ
           </span>
         </div>
 
